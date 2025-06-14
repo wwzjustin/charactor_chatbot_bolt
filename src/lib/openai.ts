@@ -6,12 +6,17 @@ if (!apiKey) {
   console.warn('OpenAI API key not found. Please add VITE_OPENAI_API_KEY to your .env file.');
 }
 
-export const openai = new OpenAI({
+// Only instantiate OpenAI client if API key is available
+export const openai = apiKey ? new OpenAI({
   apiKey: apiKey,
   dangerouslyAllowBrowser: true
-});
+}) : null;
 
 export async function getChatCompletion(messages: Array<{role: string, content: string}>, systemPrompt: string) {
+  if (!openai) {
+    throw new Error('OpenAI API key is not configured. Please add VITE_OPENAI_API_KEY to your .env file.');
+  }
+
   try {
     const response = await openai.chat.completions.create({
       model: 'gpt-3.5-turbo',
